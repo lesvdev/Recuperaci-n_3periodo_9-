@@ -1,0 +1,870 @@
+<!doctype html>
+<html lang="es">
+<head>
+<title>Reto Micro:bit — Recuperación 9°</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* ═══════ TOKENS ═══════ */
+:root {
+  --bg:       #EAF2FF;
+  --surface:  #FFFFFF;
+  --surf2:    #F2F7FF;
+  --border:   #C5D8F0;
+  --blue:     #0068C8;
+  --blue-dim: #D8EAFF;
+  --teal:     #007B74;
+  --accent:   #D91B60;
+  --text:     #091D35;
+  --muted:    #587490;
+  --ok:       #0A7A42;
+  --ok-dim:   #D4F0E4;
+  --warn:     #B85C00;
+  --warn-dim: #FFF0D8;
+  --shadow:   0 4px 20px rgba(9,29,53,.10);
+  --r:        14px;
+}
+@media (prefers-color-scheme:dark) {
+  :root:not([data-theme="light"]) {
+    --bg:#05101F; --surface:#0B1E35; --surf2:#0E2440;
+    --border:#1A3D62; --blue:#38B6FF; --blue-dim:#082440;
+    --teal:#00D4C8; --accent:#FF4D88; --text:#E6F1FF;
+    --muted:#7AABC8; --ok:#4ADE80; --ok-dim:#083A20;
+    --warn:#FFAD42; --warn-dim:#2C1800;
+    --shadow:0 6px 30px rgba(0,0,0,.45);
+  }
+}
+:root[data-theme="dark"] {
+  --bg:#05101F; --surface:#0B1E35; --surf2:#0E2440;
+  --border:#1A3D62; --blue:#38B6FF; --blue-dim:#082440;
+  --teal:#00D4C8; --accent:#FF4D88; --text:#E6F1FF;
+  --muted:#7AABC8; --ok:#4ADE80; --ok-dim:#083A20;
+  --warn:#FFAD42; --warn-dim:#2C1800;
+  --shadow:0 6px 30px rgba(0,0,0,.45);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
+h1,h2,h3,h4{font-family:'Exo 2',system-ui,sans-serif;text-wrap:balance}
+
+/* ── Header ── */
+.site-header{background:var(--text);color:#fff;padding:0 20px;display:flex;align-items:center;gap:12px;height:58px;position:sticky;top:0;z-index:50}
+.led-grid{display:grid;grid-template-columns:repeat(5,6px);grid-template-rows:repeat(5,6px);gap:2px;flex-shrink:0}
+.led{border-radius:50%;background:#ff003c44}
+.led.on{background:#ff3c6a;box-shadow:0 0 5px #ff3c6a}
+.site-header h1{font-family:'Exo 2',sans-serif;font-size:1rem;font-weight:700;letter-spacing:.4px;line-height:1.2}
+.site-header h1 span{opacity:.5;font-weight:400;margin-left:6px;font-size:.82rem}
+.header-right{margin-left:auto}
+.btn-teacher{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:20px;padding:5px 14px;font-family:'Inter',sans-serif;font-size:.8rem;font-weight:500;cursor:pointer;transition:background .2s;white-space:nowrap}
+.btn-teacher:hover{background:rgba(255,255,255,.2)}
+
+/* ── Layout ── */
+.wrap{max-width:720px;margin:0 auto;padding:28px 18px 80px}
+
+/* ── Card ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:26px;margin-bottom:22px}
+.card-title{font-family:'Exo 2',sans-serif;font-size:1.12rem;font-weight:700;margin-bottom:3px;display:flex;align-items:center;gap:8px}
+.card-sub{color:var(--muted);font-size:.875rem;margin-bottom:20px}
+
+/* ── Form ── */
+.field{margin-bottom:16px}
+.field label{display:block;font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.field input[type="text"]{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:.95rem;background:var(--surf2);color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s}
+.field input[type="text"]:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
+.grade-pills{display:flex;flex-wrap:wrap;gap:7px}
+.grade-pill{border:1.5px solid var(--border);border-radius:20px;padding:5px 15px;font-size:.875rem;font-weight:600;cursor:pointer;background:var(--surf2);color:var(--text);transition:all .18s;user-select:none}
+.grade-pill:hover{border-color:var(--blue);color:var(--blue)}
+.grade-pill.sel{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn-gen{width:100%;margin-top:8px;padding:13px;border-radius:10px;border:none;background:var(--blue);color:#fff;font-family:'Exo 2',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:filter .2s,transform .15s;letter-spacing:.4px}
+.btn-gen:hover:not(:disabled){filter:brightness(1.12)}
+.btn-gen:active:not(:disabled){transform:scale(.98)}
+.btn-gen:disabled{opacity:.48;cursor:default}
+
+/* ── Result card ── */
+.result-card{display:none}
+.result-card.on{display:block}
+.ej-badge{display:inline-flex;align-items:center;gap:5px;background:var(--blue-dim);color:var(--blue);border-radius:20px;padding:3px 11px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.ej-title{font-family:'Exo 2',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:8px}
+.ej-desc{color:var(--muted);font-size:.88rem;margin-bottom:14px;line-height:1.65;border-left:3px solid var(--border);padding-left:11px}
+.tag-list{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:16px}
+.tag{background:var(--surf2);border:1px solid var(--border);border-radius:5px;padding:2px 9px;font-size:.76rem;color:var(--muted)}
+.tag.lvl{background:var(--blue-dim);color:var(--blue);border-color:var(--blue)}
+.notice{background:var(--warn-dim);border:1px solid var(--warn);border-left:4px solid var(--warn);border-radius:8px;padding:11px 13px;font-size:.845rem;color:var(--warn);margin-bottom:14px;display:flex;gap:9px}
+.notice svg{flex-shrink:0;margin-top:1px}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn-dl{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:9px;border:none;background:var(--ok);color:#fff;font-family:'Exo 2',sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;transition:filter .2s}
+.btn-dl:hover:not(:disabled){filter:brightness(1.1)}
+.btn-dl:disabled{opacity:.5;cursor:default}
+.btn-vis{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:9px;border:1.5px solid var(--blue);background:transparent;color:var(--blue);font-family:'Exo 2',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:background .18s}
+.btn-vis:hover{background:var(--blue-dim)}
+.dl-note{font-size:.78rem;color:var(--muted);margin-top:7px}
+
+/* ── Registry ── */
+.eyebrow{font-family:'Exo 2',sans-serif;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.eyebrow::after{content:'';flex:1;height:1px;background:var(--border)}
+.reg-empty{background:var(--surface);border:1px dashed var(--border);border-radius:var(--r);text-align:center;padding:28px 16px;color:var(--muted);font-size:.88rem}
+.tbl-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border)}
+.tbl{width:100%;border-collapse:collapse;font-size:.855rem}
+.tbl th{background:var(--surf2);font-weight:600;font-size:.73rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:9px 11px;text-align:left;border-bottom:1px solid var(--border)}
+.tbl td{padding:9px 11px;border-bottom:1px solid var(--border);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--surf2)}
+.chip-reto{background:var(--blue-dim);color:var(--blue);border-radius:5px;padding:2px 8px;font-size:.76rem;font-weight:600;white-space:nowrap}
+.chip-grado{background:var(--surf2);border:1px solid var(--border);border-radius:5px;padding:2px 8px;font-size:.78rem;font-weight:600}
+.btn-sm-dl{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:5px;border:1.5px solid var(--ok);background:transparent;color:var(--ok);font-size:.76rem;font-weight:600;cursor:pointer;transition:background .18s}
+.btn-sm-dl:hover{background:var(--ok-dim)}
+.fecha-txt{color:var(--muted);font-size:.78rem;font-variant-numeric:tabular-nums}
+
+/* ── Overlay (shared) ── */
+.overlay{position:fixed;inset:0;background:rgba(5,15,30,.6);backdrop-filter:blur(4px);z-index:100;display:none;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.o-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);width:min(660px,calc(100vw - 28px));max-height:calc(100vh - 60px);overflow-y:auto;padding:26px;position:relative}
+.o-panel h2{font-family:'Exo 2',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.btn-close{position:absolute;top:14px;right:14px;background:var(--surf2);border:1px solid var(--border);border-radius:6px;width:30px;height:30px;cursor:pointer;color:var(--text);font-size:1rem;display:flex;align-items:center;justify-content:center}
+.btn-close:hover{background:var(--border)}
+
+/* ── Password ── */
+.pw-center{text-align:center;padding:16px 0}
+.pw-center p{color:var(--muted);font-size:.88rem;margin-bottom:14px}
+.pw-input{width:100%;max-width:260px;padding:9px 13px;border:1.5px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:.95rem;background:var(--surf2);color:var(--text);outline:none;text-align:center;letter-spacing:.12em;display:block;margin:0 auto 10px}
+.pw-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
+.pw-err{color:var(--accent);font-size:.82rem;margin-top:6px;display:none}
+.btn-pw{padding:9px 26px;border-radius:8px;border:none;background:var(--blue);color:#fff;font-family:'Exo 2',sans-serif;font-weight:700;font-size:.92rem;cursor:pointer}
+.btn-pw:hover{filter:brightness(1.1)}
+
+/* ── Teacher view ── */
+.t-view{display:none}
+.t-view.on{display:block}
+.stat-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.stat{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:9px 14px}
+.stat-v{font-family:'Exo 2',sans-serif;font-size:1.45rem;font-weight:800;color:var(--blue);line-height:1}
+.stat-l{font-size:.72rem;color:var(--muted);margin-top:2px}
+.btn-del{padding:4px 9px;border-radius:5px;border:1.5px solid var(--accent);background:transparent;color:var(--accent);font-size:.76rem;font-weight:600;cursor:pointer;transition:background .18s}
+.btn-del:hover{background:rgba(217,27,96,.1)}
+
+/* ── MakeCode Block Visuals ── */
+.vis-wrap{padding:4px 0}
+.blk-group{margin-bottom:10px}
+.blk{display:flex;align-items:center;flex-wrap:wrap;gap:4px;padding:5px 10px 5px 14px;border-radius:5px;font-family:'Exo 2',monospace;font-size:12px;font-weight:600;color:#fff;margin:2px 0;position:relative;cursor:default;line-height:1.4}
+.blk::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:7px;height:14px;background:rgba(0,0,0,.2);border-radius:0 5px 5px 0}
+.blk-body{margin-left:18px;padding:3px 0 3px 10px;border-left:4px solid rgba(0,0,0,.15)}
+.blk-v{background:rgba(255,255,255,.25);border-radius:10px;padding:1px 7px;font-size:11px;white-space:nowrap}
+.blk-op{background:rgba(255,255,255,.18);border-radius:4px;padding:1px 5px;font-size:11px}
+.b-blue{background:#4C97FF}
+.b-teal{background:#2E9A9A}
+.b-red{background:#CE3C37}
+.b-orange{background:#E07A1C}
+.b-indigo{background:#5E68BA}
+.b-purple{background:#9B59B6}
+.b-green{background:#3A9A3A}
+.vis-note{font-size:.78rem;color:var(--muted);margin-top:10px;padding:8px 10px;background:var(--surf2);border-radius:6px}
+.vis-link{display:inline-flex;align-items:center;gap:5px;color:var(--blue);font-weight:600;font-size:.82rem;text-decoration:none;margin-top:8px}
+.vis-link:hover{text-decoration:underline}
+
+/* ── Spinner / Toast ── */
+.spin{display:inline-block;width:15px;height:15px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:22px;right:22px;background:var(--text);color:var(--bg);padding:9px 16px;border-radius:8px;font-size:.855rem;font-weight:500;z-index:200;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+
+@media(max-width:480px){.card{padding:18px 14px}.o-panel{padding:18px}.stat-v{font-size:1.2rem}.btn-row{gap:8px}}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="led-grid" id="ledGrid"></div>
+  <h1>CASD — Informática<span>Recuperación Micro:bit · 9°</span></h1>
+  <div class="header-right">
+    <button class="btn-teacher" onclick="openTeacher()">🔐 Docente</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- Student form -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Generar mi reto de recuperación
+    </div>
+    <p class="card-sub">Escribe tu nombre, selecciona tu grado y recibe un ejercicio de Micro:bit asignado al azar.</p>
+
+    <div class="field">
+      <label>Tu nombre completo</label>
+      <input type="text" id="iNombre" placeholder="Ej. Juan David García Pérez" autocomplete="name">
+    </div>
+    <div class="field">
+      <label>Selecciona tu grado</label>
+      <div class="grade-pills">
+        <div class="grade-pill" data-g="9°01" onclick="selGrade(this)">9°01</div>
+        <div class="grade-pill" data-g="9°02" onclick="selGrade(this)">9°02</div>
+        <div class="grade-pill" data-g="9°03" onclick="selGrade(this)">9°03</div>
+        <div class="grade-pill" data-g="9°04" onclick="selGrade(this)">9°04</div>
+        <div class="grade-pill" data-g="9°05" onclick="selGrade(this)">9°05</div>
+        <div class="grade-pill" data-g="9°06" onclick="selGrade(this)">9°06</div>
+        <div class="grade-pill" data-g="9°07" onclick="selGrade(this)">9°07</div>
+      </div>
+    </div>
+    <button class="btn-gen" id="btnGen" onclick="generarEjercicio()" disabled>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="13 2 13 9 20 9"/><path d="M20 14v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"/></svg>
+      Generar ejercicio
+    </button>
+  </div>
+
+  <!-- Result -->
+  <div class="card result-card" id="resultCard">
+    <div class="ej-badge" id="rBadge">📌 Reto —</div>
+    <div class="ej-title" id="rTitle">—</div>
+    <div class="ej-desc" id="rDesc">—</div>
+    <div class="tag-list" id="rTags"></div>
+    <div class="notice">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+      <div>
+        <strong>¿Cómo entregar este reto?</strong><br>
+        Realiza el ejercicio en <strong>MakeCode</strong> (makecode.microbit.org), descarga el archivo <strong>.hex</strong>, guárdalo en una <strong>memoria USB</strong> y tráelo el día que el docente indique. Deberás <strong>explicar tu código</strong> frente al docente.
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-dl" id="btnDl" onclick="descargarPDF()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Descargar formato (.pdf)
+      </button>
+      <button class="btn-vis" id="btnVis" onclick="openVisual()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Ver guía visual
+      </button>
+    </div>
+    <p class="dl-note">Guarda e imprime el PDF o muéstraselo al docente en tu dispositivo.</p>
+  </div>
+
+  <!-- Registry -->
+  <div class="eyebrow">Registro de ejercicios asignados</div>
+  <div id="regWrap">
+    <div class="reg-empty" id="regEmpty">
+      Aún no se han asignado ejercicios.<br>
+      <span style="font-size:.8rem;display:block;margin-top:3px">Los registros aparecerán aquí automáticamente.</span>
+    </div>
+    <div class="tbl-wrap" id="regTblWrap" style="display:none">
+      <table class="tbl">
+        <thead><tr>
+          <th>Estudiante</th><th>Grado</th><th>Reto asignado</th><th>Fecha</th><th>PDF</th>
+        </tr></thead>
+        <tbody id="regBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- Teacher overlay -->
+<div class="overlay" id="teacherOv">
+  <div class="o-panel">
+    <button class="btn-close" onclick="closeTeacher()">✕</button>
+    <div class="pw-center" id="pwScreen">
+      <h2 style="justify-content:center;margin-bottom:10px">🔐 Acceso Docente</h2>
+      <p>Ingresa la contraseña para administrar el registro de estudiantes.</p>
+      <input type="password" class="pw-input" id="pwInput" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkPw()">
+      <br><button class="btn-pw" onclick="checkPw()">Ingresar</button>
+      <p class="pw-err" id="pwErr">Contraseña incorrecta. Intenta de nuevo.</p>
+    </div>
+    <div class="t-view" id="tView">
+      <h2>📋 Panel Docente</h2>
+      <div class="stat-row" id="tStats"></div>
+      <div class="tbl-wrap" id="tTblWrap" style="display:none">
+        <table class="tbl">
+          <thead><tr><th>Estudiante</th><th>Grado</th><th>Reto asignado</th><th>Fecha</th><th>Acción</th></tr></thead>
+          <tbody id="tBody"></tbody>
+        </table>
+      </div>
+      <div id="tEmpty" style="display:none;text-align:center;padding:24px;color:var(--muted)">No hay registros aún.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Visual guide overlay -->
+<div class="overlay" id="visOv">
+  <div class="o-panel" style="max-width:600px">
+    <button class="btn-close" onclick="closeVisual()">✕</button>
+    <h2>🧱 <span id="visTitle">Guía visual del reto</span></h2>
+    <div id="visContent" class="vis-wrap"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+/* ════════════════════════════════════════════════
+   CONFIGURACIÓN — Edita esta sección
+   ════════════════════════════════════════════════ */
+const CONFIG = {
+  clave: 'CASD2024',          // Contraseña del panel docente
+
+  // Firebase Realtime Database (para registro compartido)
+  // Crea un proyecto gratuito en firebase.google.com
+  // Copia tu "databaseURL" aquí. Deja vacío para usar almacenamiento local.
+  firebaseURL: 'https://recuperacion-9-casd-default-rtdb.firebaseio.com',             // Ej: 'https://mi-proyecto-default-rtdb.firebaseio.com'
+  firebasePath: '/registros_9' // Ruta en la base de datos
+};
+/* ════════════════════════════════════════════════ */
+
+/* ── Exercises ── */
+const EJ = [
+  { id:'R01', n:'1',    emoji:'❤️',  nivel:'Inicial',
+    titulo:'Animación de corazón',
+    desc:'Crea una animación de un corazón palpitando, alternando entre las imágenes de corazón disponibles en el editor MakeCode. El corazón debe aparecer y desaparecer rítmicamente de forma continua.',
+    cont:['Entorno de programación MakeCode','Envío de código al micro:bit','Bucle "Para siempre"','Bloques de iconos y pausa'] },
+  { id:'R02', n:'2',    emoji:'🌡️', nivel:'Inicial',
+    titulo:'Termostato con sensor de temperatura',
+    desc:'Programa tu micro:bit para que funcione como un termostato: cuando la temperatura supere los 30 °C muestra el ícono de sol. Además, cada segundo debe mostrar la temperatura actual en °C.',
+    cont:['Entorno de programación MakeCode','Envío de código al micro:bit','Bucle "Para siempre"','Condicionales (Si / Si no)','Sensor de temperatura'] },
+  { id:'R03', n:'3',    emoji:'💡',  nivel:'Inicial',
+    titulo:'Enciende LEDs con umbral de luz',
+    desc:'Programa el micro:bit para que encienda todos sus LEDs al brillo máximo cuando el sensor de luminosidad detecte un nivel de luz menor a 25. Cuando la luz esté por encima de ese umbral, la pantalla debe apagarse por completo.',
+    cont:['Entorno de programación MakeCode','Envío de código al micro:bit','Bucle "Para siempre"','Condicionales (Si / Si no)','Sensor de luminosidad'] },
+  { id:'R04', n:'4',    emoji:'🔆',  nivel:'Inicial',
+    titulo:'Brillo gradual según la luz — inverso',
+    desc:'Haz que los LEDs brillen inversamente proporcional a la luz exterior: cuando hay mucha luz afuera los LEDs brillan poco, y cuando hay poca luz los LEDs brillan mucho. Nivel de luz y brillo varían entre 0 y 255.',
+    cont:['Entorno de programación MakeCode','Envío de código al micro:bit','Bucle "Para siempre"','Sensor de luminosidad','Ajuste de brillo (inverso)'] },
+  { id:'R04B',n:'4 bis',emoji:'🌤️',nivel:'Inicial',
+    titulo:'Brillo gradual según la luz — directo',
+    desc:'Haz que los LEDs brillen proporcionalmente a la luz exterior: cuando hay más luz afuera los LEDs brillan más también. El nivel de luz y el brillo varían entre 0 y 255.',
+    cont:['Entorno de programación MakeCode','Envío de código al micro:bit','Bucle "Para siempre"','Sensor de luminosidad','Ajuste de brillo proporcional'] },
+  { id:'R06', n:'6',    emoji:'✂️',  nivel:'Medio',
+    titulo:'Piedra, Papel o Tijera',
+    desc:'Al agitar el micro:bit debe mostrar aleatoriamente uno de los tres símbolos (piedra, papel o tijera) en la pantalla LED para jugar contra un compañero.',
+    cont:['Entorno de programación MakeCode','Envío de código al micro:bit','Condicionales múltiples (Si / Si no)','Variables y números aleatorios','Evento: Al agitar (acelerómetro)'] },
+  { id:'R07', n:'7',    emoji:'🎲',  nivel:'Medio',
+    titulo:'Dado electrónico',
+    desc:'Cada vez que agites el micro:bit debe mostrar un número aleatorio del 1 al 6 representado con puntos en la pantalla LED, tal como un dado real.',
+    cont:['Entorno de programación MakeCode','Envío de código al micro:bit','Condicionales múltiples','Variables y números aleatorios','Evento: Al agitar (acelerómetro)'] },
+  { id:'R09', n:'9',    emoji:'🔴',  nivel:'Inicial',
+    titulo:'Enciende o apaga corazón con dos botones',
+    desc:'Al presionar el botón A aparece un corazón grande en pantalla. Al presionar el botón B la pantalla se apaga por completo.',
+    cont:['Entorno de programación MakeCode','Envío de código al micro:bit','Evento: botón A','Evento: botón B','Iconos y borrado de pantalla'] },
+  { id:'R10', n:'10',   emoji:'🔄',  nivel:'Inicial',
+    titulo:'Alterna corazón con un botón',
+    desc:'El botón A funciona como interruptor: cada vez que se presione alterna entre mostrar un corazón y apagar la pantalla. Al inicio la pantalla debe estar apagada.',
+    cont:['Entorno de programación MakeCode','Envío de código al micro:bit','Bucle "Para siempre"','Variables booleanas (verdadero/falso)','Evento: botón A','Condicional Si/Entonces'] },
+  { id:'R11', n:'11',   emoji:'🔢',  nivel:'Inicial',
+    titulo:'Contador de turno',
+    desc:'Botón A suma 1 al turno, botón B resta 1. El contador comienza en 0 y nunca puede volverse negativo. Se muestra el número en pantalla continuamente.',
+    cont:['Entorno de programación MakeCode','Envío de código al micro:bit','Variables numéricas','Condicional (Si número < 0)','Eventos: botones A y B'] }
+];
+
+/* ── Block visual data ── */
+const VISUALS = {
+  R01: {
+    mkLink:'https://makecode.microbit.org/#',
+    blocks: [
+      { cls:'b-blue', lbl:'al iniciar', ch:[
+        { cls:'b-red', lbl:'borrar la pantalla' }
+      ]},
+      { cls:'b-blue', lbl:'para siempre', ch:[
+        { cls:'b-red', lbl:'mostrar ícono', val:'❤️ (grande)' },
+        { cls:'b-indigo', lbl:'pausa (ms)', val:'500' },
+        { cls:'b-red', lbl:'mostrar ícono', val:'💙 (pequeño)' },
+        { cls:'b-indigo', lbl:'pausa (ms)', val:'500' }
+      ]}
+    ],
+    tip:'El corazón grande y el pequeño alternan creando la animación. El bloque "para siempre" repite esto indefinidamente.'
+  },
+  R02: {
+    blocks: [
+      { cls:'b-blue', lbl:'al iniciar', ch:[
+        { cls:'b-red', lbl:'borrar la pantalla' }
+      ]},
+      { cls:'b-blue', lbl:'para siempre', ch:[
+        { cls:'b-teal', lbl:'si', val:'temperatura (°C)  >  30', sfx:'entonces', ch:[
+          { cls:'b-red', lbl:'mostrar ícono', val:'☀️ (sol)' }
+        ]},
+        { cls:'b-teal', lbl:'si no', ch:[
+          { cls:'b-red', lbl:'borrar la pantalla' }
+        ]},
+        { cls:'b-indigo', lbl:'pausa (ms)', val:'1000' },
+        { cls:'b-red', lbl:'mostrar número', val:'temperatura (°C)' },
+        { cls:'b-red', lbl:'mostrar cadena', val:'"°C"' }
+      ]}
+    ],
+    tip:'Primero verifica la temperatura: si supera 30 °C muestra el sol, si no borra la pantalla. Luego muestra el número actual.'
+  },
+  R03: {
+    blocks: [
+      { cls:'b-blue', lbl:'al iniciar', ch:[
+        { cls:'b-red', lbl:'borrar la pantalla' }
+      ]},
+      { cls:'b-blue', lbl:'para siempre', ch:[
+        { cls:'b-teal', lbl:'si', val:'nivel de luz  <  25', sfx:'entonces', ch:[
+          { cls:'b-red', lbl:'ajustar brillo', val:'255' },
+          { cls:'b-red', lbl:'mostrar LEDs', val:'▪▪▪▪▪ (todos encendidos)' }
+        ]},
+        { cls:'b-teal', lbl:'si no', ch:[
+          { cls:'b-red', lbl:'borrar la pantalla' }
+        ]}
+      ]}
+    ],
+    tip:'El sensor de luminosidad mide entre 0 (oscuro) y 255 (muy brillante). Cuando baja de 25 (casi oscuro) se encienden todos los LEDs al máximo.'
+  },
+  R04: {
+    blocks: [
+      { cls:'b-blue', lbl:'al iniciar', ch:[
+        { cls:'b-red', lbl:'borrar la pantalla' }
+      ]},
+      { cls:'b-blue', lbl:'para siempre', ch:[
+        { cls:'b-red', lbl:'borrar la pantalla' },
+        { cls:'b-red', lbl:'ajustar brillo', val:'255 − nivel de luz' },
+        { cls:'b-red', lbl:'mostrar LEDs', val:'▪▪▪▪▪ (todos)' }
+      ]}
+    ],
+    tip:'Usa la operación "255 − nivel de luz" para invertir: si hay mucha luz (ej. 200), el brillo será 55 (poco). Si hay poca luz (ej. 10), el brillo será 245 (mucho).'
+  },
+  R04B: {
+    blocks: [
+      { cls:'b-blue', lbl:'al iniciar', ch:[
+        { cls:'b-red', lbl:'borrar la pantalla' }
+      ]},
+      { cls:'b-blue', lbl:'para siempre', ch:[
+        { cls:'b-red', lbl:'borrar la pantalla' },
+        { cls:'b-red', lbl:'ajustar brillo', val:'nivel de luz' },
+        { cls:'b-red', lbl:'mostrar LEDs', val:'▪▪▪▪▪ (todos)' }
+      ]}
+    ],
+    tip:'A diferencia del inverso, aquí el brillo es igual al nivel de luz. Más luz exterior = LEDs más brillantes.'
+  },
+  R06: {
+    blocks: [
+      { cls:'b-blue', lbl:'al iniciar', ch:[
+        { cls:'b-red', lbl:'borrar la pantalla' },
+        { cls:'b-orange', lbl:'establecer', val:'numero', sfx:'= 0' }
+      ]},
+      { cls:'b-blue', lbl:'si agitado', ch:[
+        { cls:'b-orange', lbl:'establecer', val:'numero', sfx:'= escoger al azar de 1 a 3' },
+        { cls:'b-teal', lbl:'si', val:'numero = 1', sfx:'entonces', ch:[
+          { cls:'b-red', lbl:'mostrar ícono', val:'✊ (cuadrado = piedra)' }
+        ]},
+        { cls:'b-teal', lbl:'si no, si', val:'numero = 2', sfx:'entonces', ch:[
+          { cls:'b-red', lbl:'mostrar ícono', val:'🖐 (cuadrado grande = papel)' }
+        ]},
+        { cls:'b-teal', lbl:'si no', ch:[
+          { cls:'b-red', lbl:'mostrar ícono', val:'✂️ (patrón = tijera)' }
+        ]},
+        { cls:'b-indigo', lbl:'pausa (ms)', val:'1000' },
+        { cls:'b-red', lbl:'borrar la pantalla' }
+      ]}
+    ],
+    tip:'El acelerómetro detecta el movimiento de agitar. El número aleatorio (1, 2 o 3) decide qué símbolo mostrar.'
+  },
+  R07: {
+    blocks: [
+      { cls:'b-blue', lbl:'al iniciar', ch:[
+        { cls:'b-red', lbl:'borrar la pantalla' },
+        { cls:'b-orange', lbl:'establecer', val:'numero', sfx:'= 0' }
+      ]},
+      { cls:'b-blue', lbl:'si agitado', ch:[
+        { cls:'b-orange', lbl:'establecer', val:'numero', sfx:'= escoger al azar de 1 a 6' },
+        { cls:'b-teal', lbl:'si', val:'numero = 1', sfx:'entonces', ch:[
+          { cls:'b-red', lbl:'mostrar LEDs', val:'· (1 punto central)' }
+        ]},
+        { cls:'b-teal', lbl:'si no, si', val:'numero = 2', sfx:'entonces', ch:[
+          { cls:'b-red', lbl:'mostrar LEDs', val:'·· (2 puntos diagonales)' }
+        ]},
+        { cls:'b-teal', lbl:'(... y así hasta 6)', ch:[] },
+        { cls:'b-indigo', lbl:'pausa (ms)', val:'1000' },
+        { cls:'b-red', lbl:'borrar la pantalla' }
+      ]}
+    ],
+    tip:'Necesitas 6 condiciones (Si / Si no, si) para cada número del dado. En cada caso dibuja los puntos con "Mostrar LEDs".'
+  },
+  R09: {
+    blocks: [
+      { cls:'b-blue', lbl:'al iniciar', ch:[
+        { cls:'b-red', lbl:'borrar la pantalla' }
+      ]},
+      { cls:'b-blue', lbl:'para siempre', ch:[] },
+      { cls:'b-blue', lbl:'al presionarse el botón  A', ch:[
+        { cls:'b-red', lbl:'mostrar ícono', val:'❤️ (corazón grande)' }
+      ]},
+      { cls:'b-blue', lbl:'al presionarse el botón  B', ch:[
+        { cls:'b-red', lbl:'borrar la pantalla' }
+      ]}
+    ],
+    tip:'Este reto usa eventos de botón independientes. No necesitas "para siempre" con lógica. Cada botón hace su propia acción al presionarse.'
+  },
+  R10: {
+    blocks: [
+      { cls:'b-blue', lbl:'al iniciar', ch:[
+        { cls:'b-red', lbl:'borrar la pantalla' },
+        { cls:'b-orange', lbl:'establecer', val:'encendido', sfx:'= falso' }
+      ]},
+      { cls:'b-blue', lbl:'al presionarse el botón  A', ch:[
+        { cls:'b-orange', lbl:'establecer', val:'encendido', sfx:'= no encendido' }
+      ]},
+      { cls:'b-blue', lbl:'para siempre', ch:[
+        { cls:'b-teal', lbl:'si', val:'encendido = verdadero', sfx:'entonces', ch:[
+          { cls:'b-red', lbl:'mostrar ícono', val:'❤️ (corazón grande)' }
+        ]},
+        { cls:'b-teal', lbl:'si no', ch:[
+          { cls:'b-red', lbl:'borrar la pantalla' }
+        ]}
+      ]}
+    ],
+    tip:'"no encendido" invierte el valor de la variable booleana. Si era verdadero pasa a falso y viceversa. El bloque "para siempre" revisa continuamente el estado.'
+  },
+  R11: {
+    blocks: [
+      { cls:'b-blue', lbl:'al iniciar', ch:[
+        { cls:'b-red', lbl:'borrar la pantalla' },
+        { cls:'b-orange', lbl:'establecer', val:'numero', sfx:'= 0' }
+      ]},
+      { cls:'b-blue', lbl:'al presionarse el botón  A', ch:[
+        { cls:'b-orange', lbl:'cambiar', val:'numero', sfx:'por 1' }
+      ]},
+      { cls:'b-blue', lbl:'al presionarse el botón  B', ch:[
+        { cls:'b-orange', lbl:'cambiar', val:'numero', sfx:'por −1' }
+      ]},
+      { cls:'b-blue', lbl:'para siempre', ch:[
+        { cls:'b-teal', lbl:'si', val:'numero < 0', sfx:'entonces', ch:[
+          { cls:'b-orange', lbl:'establecer', val:'numero', sfx:'= 0' }
+        ]},
+        { cls:'b-red', lbl:'mostrar número', val:'numero' }
+      ]}
+    ],
+    tip:'El bloque "cambiar por −1" puede hacer el número negativo. El condicional dentro de "para siempre" lo corrige antes de mostrarlo.'
+  }
+};
+
+/* ── State ── */
+let grade='', currEj=null, currEst=null, records=[], teacherOk=false;
+let db = null; // Firebase DB reference
+
+/* ── LED animation ── */
+const ledP=[0,1,0,1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,0,1,0,0];
+const lg=document.getElementById('ledGrid');
+ledP.forEach((on,i)=>{const d=document.createElement('div');d.className='led'+(on?' on':'');d.id='l'+i;lg.appendChild(d);});
+setInterval(()=>{lg.querySelectorAll('.led.on').forEach(l=>{if(Math.random()<.28){l.classList.remove('on');setTimeout(()=>l.classList.add('on'),150+Math.random()*450);}});},900);
+
+/* ── Firebase init (optional) ── */
+(async()=>{
+  if (!CONFIG.firebaseURL) { loadLS(); return; }
+  try {
+    // Use Firebase REST API (no SDK needed — works on any static host)
+    await syncFromFirebase();
+    // Poll every 8 seconds for real-time-ish updates
+    setInterval(syncFromFirebase, 8000);
+  } catch(e) { console.warn('Firebase no disponible, usando almacenamiento local.', e); loadLS(); }
+})();
+
+async function syncFromFirebase() {
+  const r = await fetch(CONFIG.firebaseURL + CONFIG.firebasePath + '.json');
+  if (!r.ok) throw new Error('Firebase fetch failed');
+  const data = await r.json();
+  if (data) {
+    records = Object.entries(data).map(([id,v])=>({id,...v}))
+      .sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
+  } else { records = []; }
+  renderReg();
+  if (teacherOk) renderTeacher();
+}
+async function pushToFirebase(rec) {
+  const id = 'r' + Date.now();
+  const r = await fetch(CONFIG.firebaseURL + CONFIG.firebasePath + '/' + id + '.json', {
+    method:'PUT',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(rec)
+  });
+  if (!r.ok) throw new Error('Firebase write failed');
+  return id;
+}
+async function deleteFromFirebase(id) {
+  const r = await fetch(CONFIG.firebaseURL + CONFIG.firebasePath + '/' + id + '.json', {method:'DELETE'});
+  if (!r.ok) throw new Error('Firebase delete failed');
+}
+
+function loadLS() {
+  try { records = JSON.parse(localStorage.getItem('mb_recs_9')||'[]'); } catch(e){records=[];}
+  renderReg();
+}
+function saveLS() {
+  try { localStorage.setItem('mb_recs_9', JSON.stringify(records)); } catch(e){}
+}
+
+/* ── Form logic ── */
+function selGrade(el) {
+  document.querySelectorAll('.grade-pill').forEach(p=>p.classList.remove('sel'));
+  el.classList.add('sel'); grade=el.dataset.g; checkReady();
+}
+document.getElementById('iNombre').addEventListener('input', checkReady);
+function checkReady() {
+  document.getElementById('btnGen').disabled=!(document.getElementById('iNombre').value.trim().length>=3 && grade);
+}
+
+function generarEjercicio() {
+  const nom = document.getElementById('iNombre').value.trim();
+  if (!nom||!grade) return;
+  const ej = EJ[Math.floor(Math.random()*EJ.length)];
+  currEj=ej; currEst={nombre:nom, grado:grade};
+  document.getElementById('rBadge').textContent = ej.emoji+' Reto '+ej.n;
+  document.getElementById('rTitle').textContent = 'Reto '+ej.n+': '+ej.titulo;
+  document.getElementById('rDesc').textContent = ej.desc;
+  document.getElementById('rTags').innerHTML =
+    ej.cont.map(c=>`<span class="tag">${esc(c)}</span>`).join('')+
+    `<span class="tag lvl">Nivel: ${ej.nivel}</span>`;
+  document.getElementById('resultCard').classList.add('on');
+  document.getElementById('resultCard').scrollIntoView({behavior:'smooth',block:'start'});
+  guardarReg({nombre:nom,grado:grade,ejId:ej.id,ejTitulo:'Reto '+ej.n+': '+ej.titulo,fecha:new Date().toISOString(),timestamp:Date.now()});
+}
+
+async function guardarReg(rec) {
+  if (CONFIG.firebaseURL) {
+    try { await pushToFirebase(rec); await syncFromFirebase(); return; } catch(e){console.warn(e);}
+  }
+  const id='rec_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+  records.unshift({id,...rec}); saveLS(); renderReg(); if(teacherOk) renderTeacher();
+}
+
+/* ── PDF generation ── */
+async function descargarPDF(ejId, nombre, grado) {
+  let ej=currEj, est=currEst;
+  if (ejId) { ej=EJ.find(e=>e.id===ejId)||ej; est={nombre,grado}; }
+  if (!ej||!est) return;
+  const btn = ejId ? null : document.getElementById('btnDl');
+  if (btn){ btn.disabled=true; btn.innerHTML='<div class="spin"></div> Generando...'; }
+  try {
+    const {jsPDF} = window.jspdf;
+    const pdf = new jsPDF({orientation:'p',unit:'mm',format:'a5'});
+    const W=148, margin=11;
+    let y=0;
+
+    // ── Header strip
+    pdf.setFillColor(0,104,200);
+    pdf.rect(0,0,W,24,'F');
+    pdf.setTextColor(255,255,255);
+    pdf.setFont('helvetica','bold');
+    pdf.setFontSize(10.5);
+    pdf.text('INSTITUCIÓN EDUCATIVA CASD — BARRANCABERMEJA',W/2,9,{align:'center'});
+    pdf.setFont('helvetica','normal');
+    pdf.setFontSize(9);
+    pdf.text('Área: Informática  ·  Grado 9°  ·  Recuperación académica',W/2,16,{align:'center'});
+    y=30;
+
+    // ── Title
+    pdf.setTextColor(0,104,200);
+    pdf.setFont('helvetica','bold');
+    pdf.setFontSize(13);
+    pdf.text('FORMATO DE RECUPERACIÓN',W/2,y,{align:'center'}); y+=6;
+    pdf.setFontSize(10);
+    pdf.text('Micro:bit + MakeCode',W/2,y,{align:'center'}); y+=9;
+
+    // ── Divider
+    pdf.setDrawColor(0,104,200); pdf.setLineWidth(.5);
+    pdf.line(margin,y,W-margin,y); y+=7;
+
+    // ── Student info box
+    pdf.setFillColor(242,247,255); pdf.setDrawColor(197,216,240);
+    pdf.roundedRect(margin,y,W-margin*2,18,2,2,'FD');
+    pdf.setTextColor(88,116,144); pdf.setFontSize(7.5); pdf.setFont('helvetica','normal');
+    pdf.text('ESTUDIANTE',margin+3,y+5);
+    pdf.text('GRADO',margin+82,y+5);
+    pdf.text('FECHA DE ASIGNACIÓN',margin+106,y+5);
+    pdf.setTextColor(9,29,53); pdf.setFontSize(9.5); pdf.setFont('helvetica','bold');
+    pdf.text(est.nombre,margin+3,y+12);
+    pdf.text(est.grado,margin+82,y+12);
+    const fDate=new Date().toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'});
+    pdf.text(fDate,margin+106,y+12);
+    y+=24;
+
+    // ── Exercise block
+    pdf.setFillColor(0,104,200);
+    pdf.roundedRect(margin,y,W-margin*2,7,1.5,1.5,'F');
+    pdf.setTextColor(255,255,255); pdf.setFont('helvetica','bold'); pdf.setFontSize(9);
+    pdf.text('RETO '+ej.n.toString().toUpperCase()+': '+ej.titulo.toUpperCase(),W/2,y+4.8,{align:'center'});
+    y+=12;
+
+    // ── Description
+    pdf.setTextColor(88,116,144); pdf.setFont('helvetica','bold'); pdf.setFontSize(8);
+    pdf.text('DESCRIPCIÓN DEL RETO:',margin,y); y+=5;
+    pdf.setTextColor(9,29,53); pdf.setFont('helvetica','normal'); pdf.setFontSize(8.5);
+    const descLines = pdf.splitTextToSize(ej.desc, W-margin*2-4);
+    pdf.setFillColor(242,247,255); pdf.setDrawColor(197,216,240);
+    pdf.roundedRect(margin,y-1,W-margin*2,descLines.length*4.5+5,1.5,1.5,'FD');
+    pdf.text(descLines, margin+3, y+3.5); y+=descLines.length*4.5+8;
+
+    // ── Contenidos
+    pdf.setTextColor(88,116,144); pdf.setFont('helvetica','bold'); pdf.setFontSize(8);
+    pdf.text('CONTENIDOS QUE PONES EN PRÁCTICA:',margin,y); y+=5;
+    pdf.setTextColor(9,29,53); pdf.setFont('helvetica','normal'); pdf.setFontSize(8);
+    ej.cont.forEach(c=>{ pdf.text('• '+c,margin+3,y); y+=4.5; }); y+=3;
+
+    // ── Divider
+    pdf.setDrawColor(197,216,240); pdf.setLineWidth(.35);
+    pdf.line(margin,y,W-margin,y); y+=6;
+
+    // ── Steps
+    pdf.setTextColor(0,104,200); pdf.setFont('helvetica','bold'); pdf.setFontSize(9);
+    pdf.text('PASOS PARA COMPLETAR TU RETO',margin,y); y+=6;
+    const steps=[
+      '1. Abre el editor MakeCode en: makecode.microbit.org',
+      '2. Lee la descripción del reto antes de empezar a programar.',
+      '3. Construye tu programa con bloques. Puedes apoyarte en la guía visual.',
+      '4. Prueba en el simulador del editor que el programa funcione.',
+      '5. Haz clic en "Descargar" para guardar el archivo .hex.',
+      '6. Copia el archivo .hex a una memoria USB.',
+      '7. El día indicado por el docente, trae la USB y explica tu código.'
+    ];
+    pdf.setTextColor(9,29,53); pdf.setFont('helvetica','normal'); pdf.setFontSize(8);
+    steps.forEach(s=>{
+      const ls=pdf.splitTextToSize(s,W-margin*2-4);
+      pdf.text(ls,margin+3,y); y+=ls.length*4.5;
+    }); y+=3;
+
+    // ── Warning box
+    pdf.setFillColor(255,240,216); pdf.setDrawColor(184,92,0);
+    pdf.setLineWidth(.6);
+    pdf.roundedRect(margin,y,W-margin*2,18,2,2,'FD');
+    pdf.setTextColor(184,92,0); pdf.setFont('helvetica','bold'); pdf.setFontSize(8);
+    pdf.text('⚠ IMPORTANTE — Recuerda:',margin+3,y+5.5);
+    pdf.setFont('helvetica','normal'); pdf.setFontSize(7.8);
+    pdf.text('✔ Trae el archivo .hex en una memoria USB el día indicado.',margin+3,y+10.5);
+    pdf.text('✔ Debes poder EXPLICAR tu código frente al docente.',margin+3,y+15);
+    y+=23;
+
+    // ── Signatures
+    pdf.setDrawColor(197,216,240); pdf.setLineWidth(.35);
+    pdf.line(margin,y,W-margin,y); y+=6;
+    pdf.setTextColor(9,29,53); pdf.setFont('helvetica','normal'); pdf.setFontSize(8);
+    pdf.text('Firma del estudiante:',margin,y+14);
+    pdf.line(margin+38,y+14,margin+78,y+14);
+    pdf.text('Fecha límite de entrega:',margin+84,y+5);
+    pdf.text('_____ / _____ / _______',margin+84,y+11);
+    pdf.text('Firma del docente:',margin+84,y+20);
+    pdf.line(margin+84+35,y+20,W-margin,y+20);
+
+    // Footer
+    pdf.setFillColor(9,29,53);
+    pdf.rect(0,204,W,6,'F');
+    pdf.setTextColor(150,180,210); pdf.setFont('helvetica','normal'); pdf.setFontSize(6.5);
+    pdf.text('I.E. CASD — Barrancabermeja | Informática Grado 9° | Recuperación Micro:bit + MakeCode',W/2,207.5,{align:'center'});
+
+    const safe=(est.nombre||'estudiante').replace(/[^a-zA-Z0-9áéíóúñ ]/g,'_').replace(/\s+/g,'_');
+    pdf.save('Recuperacion_'+safe+'_'+est.grado.replace('°','')+'.pdf');
+    showToast('✅ PDF descargado correctamente');
+  } catch(e) {
+    showToast('⚠️ Error al generar el PDF. Intenta de nuevo.'); console.error(e);
+  }
+  if(btn){ btn.disabled=false; btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Descargar formato (.pdf)'; }
+}
+
+/* ── Block visual renderer ── */
+function renderBlocks(blocks) {
+  if(!blocks||!blocks.length) return '';
+  return blocks.map(b => {
+    const val  = b.val  ? `<span class="blk-v">${esc(b.val)}</span>`  : '';
+    const sfx  = b.sfx  ? `<span class="blk-op">${esc(b.sfx)}</span>` : '';
+    const ch   = b.ch && b.ch.length ? `<div class="blk-body">${renderBlocks(b.ch)}</div>` : '';
+    return `<div class="blk-group"><div class="blk ${b.cls}">${esc(b.lbl)} ${val} ${sfx}</div>${ch}</div>`;
+  }).join('');
+}
+
+function openVisual() {
+  if (!currEj) return;
+  const v = VISUALS[currEj.id];
+  document.getElementById('visTitle').textContent = 'Reto '+currEj.n+' — '+currEj.titulo;
+  document.getElementById('visContent').innerHTML =
+    `<p style="color:var(--muted);font-size:.85rem;margin-bottom:14px">Estos son los bloques que necesitas en MakeCode para resolver este reto. ¡Úsalos como guía, no copies directamente!</p>`+
+    renderBlocks(v.blocks)+
+    (v.tip ? `<div class="vis-note">💡 <strong>Pista:</strong> ${esc(v.tip)}</div>` : '')+
+    `<a class="vis-link" href="https://makecode.microbit.org" target="_blank" rel="noopener">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      Abrir MakeCode
+    </a>`;
+  document.getElementById('visOv').classList.add('open');
+}
+function closeVisual() { document.getElementById('visOv').classList.remove('open'); }
+document.getElementById('visOv').addEventListener('click',e=>{ if(e.target===document.getElementById('visOv')) closeVisual(); });
+
+/* ── Registry render ── */
+function renderReg() {
+  const emp=document.getElementById('regEmpty'), tw=document.getElementById('regTblWrap');
+  if (!records.length) { emp.style.display='block'; tw.style.display='none'; return; }
+  emp.style.display='none'; tw.style.display='block';
+  document.getElementById('regBody').innerHTML = records.map(r=>`
+    <tr>
+      <td><strong>${esc(r.nombre)}</strong></td>
+      <td><span class="chip-grado">${esc(r.grado)}</span></td>
+      <td><span class="chip-reto">${esc(r.ejTitulo||r.ejercicioTitulo||'')}</span></td>
+      <td><span class="fecha-txt">${fmtDate(r.fecha)}</span></td>
+      <td><button class="btn-sm-dl" onclick="descargarPDF('${r.ejId||r.ejercicioId}','${esc(r.nombre)}','${esc(r.grado)}')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>PDF
+      </button></td>
+    </tr>`).join('');
+}
+
+/* ── Teacher panel ── */
+function openTeacher() {
+  document.getElementById('teacherOv').classList.add('open');
+  document.getElementById('pwInput').value='';
+  document.getElementById('pwErr').style.display='none';
+  if (!teacherOk) { document.getElementById('pwScreen').style.display='block'; document.getElementById('tView').classList.remove('on'); }
+  else { document.getElementById('pwScreen').style.display='none'; document.getElementById('tView').classList.add('on'); renderTeacher(); }
+  setTimeout(()=>document.getElementById('pwInput').focus(),80);
+}
+function closeTeacher() { document.getElementById('teacherOv').classList.remove('open'); }
+document.getElementById('teacherOv').addEventListener('click',e=>{ if(e.target===document.getElementById('teacherOv')) closeTeacher(); });
+document.getElementById('pwInput').addEventListener('keydown',e=>{ document.getElementById('pwErr').style.display='none'; });
+
+function checkPw() {
+  if (document.getElementById('pwInput').value===CONFIG.clave) {
+    teacherOk=true;
+    document.getElementById('pwScreen').style.display='none';
+    document.getElementById('tView').classList.add('on');
+    renderTeacher();
+  } else {
+    document.getElementById('pwErr').style.display='block';
+    document.getElementById('pwInput').value='';
+    document.getElementById('pwInput').focus();
+  }
+}
+
+function renderTeacher() {
+  if (!teacherOk) return;
+  const grades=[...new Set(records.map(r=>r.grado))].length;
+  document.getElementById('tStats').innerHTML=`
+    <div class="stat"><div class="stat-v">${records.length}</div><div class="stat-l">Registros</div></div>
+    <div class="stat"><div class="stat-v">${grades}</div><div class="stat-l">Grados</div></div>
+    <div class="stat"><div class="stat-v">${[...new Set(records.map(r=>r.ejId||r.ejercicioId))].length}</div><div class="stat-l">Retos distintos</div></div>`;
+  const tw=document.getElementById('tTblWrap'), te=document.getElementById('tEmpty');
+  if (!records.length) { tw.style.display='none'; te.style.display='block'; return; }
+  tw.style.display='block'; te.style.display='none';
+  document.getElementById('tBody').innerHTML=records.map(r=>`
+    <tr>
+      <td><strong>${esc(r.nombre)}</strong></td>
+      <td><span class="chip-grado">${esc(r.grado)}</span></td>
+      <td><span class="chip-reto">${esc(r.ejTitulo||r.ejercicioTitulo||'')}</span></td>
+      <td><span class="fecha-txt">${fmtDate(r.fecha)}</span></td>
+      <td><button class="btn-del" onclick="eliminar('${r.id}')">Eliminar</button></td>
+    </tr>`).join('');
+}
+
+async function eliminar(id) {
+  if (!confirm('¿Eliminar este registro? No se puede deshacer.')) return;
+  if (CONFIG.firebaseURL) {
+    try { await deleteFromFirebase(id); await syncFromFirebase(); }
+    catch(e){ showToast('⚠️ Error al eliminar'); return; }
+  } else {
+    records=records.filter(r=>r.id!==id); saveLS(); renderReg();
+  }
+  renderTeacher(); showToast('🗑️ Registro eliminado');
+}
+
+/* ── Utilities ── */
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtDate(iso){ try{ return new Date(iso).toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'}); }catch(e){return iso||'—';} }
+let toastT;
+function showToast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),3200); }
+</script>
+</body>
+</html>
