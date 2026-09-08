@@ -177,7 +177,7 @@ h1,h2,h3,h4{font-family:'Exo 2',system-ui,sans-serif;text-wrap:balance}
 
 <header class="site-header">
   <div class="led-grid" id="ledGrid"></div>
-  <h1>CASD — Informática<span>Recuperación Micro:bit · 9°</span></h1>
+  <h1>I.E.CASD JPP — Informática<span>Recuperación Micro:bit · 9°</span></h1>
   <div class="header-right">
     <button class="btn-teacher" onclick="openTeacher()">🔐 Docente</button>
   </div>
@@ -645,7 +645,7 @@ async function descargarPDF(ejId, nombre, grado) {
     pdf.setTextColor(255,255,255);
     pdf.setFont('helvetica','bold');
     pdf.setFontSize(10.5);
-    pdf.text('INSTITUCIÓN EDUCATIVA CASD — BARRANCABERMEJA',W/2,9,{align:'center'});
+    pdf.text('INSTITUCIÓN EDUCATIVA CASD JPP — BARRANCABERMEJA',W/2,9,{align:'center'});
     pdf.setFont('helvetica','normal');
     pdf.setFontSize(9);
     pdf.text('Área: Informática  ·  Grado 9°  ·  Recuperación académica',W/2,16,{align:'center'});
@@ -747,7 +747,7 @@ async function descargarPDF(ejId, nombre, grado) {
     pdf.setFillColor(9,29,53);
     pdf.rect(0,204,W,6,'F');
     pdf.setTextColor(150,180,210); pdf.setFont('helvetica','normal'); pdf.setFontSize(6.5);
-    pdf.text('I.E. CASD — Barrancabermeja | Informática Grado 9° | Recuperación Micro:bit + MakeCode',W/2,207.5,{align:'center'});
+    pdf.text('I.E. CASD JPP — Barrancabermeja | Informática Grado 9° | Recuperación Micro:bit + MakeCode',W/2,207.5,{align:'center'});
 
     const safe=(est.nombre||'estudiante').replace(/[^a-zA-Z0-9áéíóúñ ]/g,'_').replace(/\s+/g,'_');
     pdf.save('Recuperacion_'+safe+'_'+est.grado.replace('°','')+'.pdf');
